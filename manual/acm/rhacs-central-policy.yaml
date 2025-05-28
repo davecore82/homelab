@@ -1,0 +1,58 @@
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: rhacs-central
+  annotations:
+    policy.open-cluster-management.io/standards: Security
+    policy.open-cluster-management.io/categories: Kubernetes
+    policy.open-cluster-management.io/controls: RHACS Central
+spec:
+  remediationAction: enforce
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: rhacs-central-namespace
+        spec:
+          remediationAction: inform
+          severity: high
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: v1                    
+                kind: Namespace
+                metadata:
+                  labels:
+                    openshift.io/cluster-monitoring: "true"
+                  name: rhacs-operator
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: rhacs-central
+        spec:
+          remediationAction: inform
+          severity: high
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: platform.rhacs-operator.io/v1alpha1
+                kind: Central
+                metadata:
+                  name: rhacs-operator-central-services
+                  namespace: rhacs-operator
+                spec:
+                  central:
+                    db:
+                      resources:
+                        requests:
+                          cpu: 250m
+                          memory: 4Gi
+                    resources:
+                      limits:
+                        memory: 4Gi
+                      requests:
+                        cpu: 500m
+                        memory: 2Gi

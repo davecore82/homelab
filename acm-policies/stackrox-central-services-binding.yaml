@@ -1,0 +1,14 @@
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: stackrox-central-services-binding
+  namespace: open-cluster-management-policies
+placementRef:
+  kind: PlacementRule
+  name: stackrox-central-services-placement
+  apiGroup: apps.open-cluster-management.io
+subjects:
+  - kind: Policy
+    name: stackrox-central-services-memory-policy
+    apiGroup: policy.open-cluster-management.io
+

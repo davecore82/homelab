@@ -1,0 +1,18 @@
+apiVersion: loki.grafana.com/v1
+kind: LokiStack
+metadata:
+  name: logging-loki
+  namespace: openshift-logging
+spec:
+  size: 1x.demo
+  storageClassName: lvms-vg1
+  storage:
+    secret:
+      name: lokistack-dev-odf
+      type: s3
+  tls:
+    caName: openshift-service-ca.crt
+    caKey: service-ca.crt
+  tenants:
+    mode: openshift-logging
+

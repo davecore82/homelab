@@ -1,0 +1,22 @@
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: memory-policy
+  namespace: open-cluster-management-policies
+spec:
+  disabled: false  # Set to false to enable the policy
+  remediationAction: enforce
+  policy-templates:
+    - objectDefinition:
+        apiVersion: stackrox.io/v1
+        kind: Central
+        metadata:
+          name: stackrox-central-services
+          namespace: stackrox
+        spec:
+          central:
+            db:
+              resources:
+                requests:
+                  memory: 4Gi
+
