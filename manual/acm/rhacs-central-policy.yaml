@@ -1,47 +1,27 @@
+---
 apiVersion: policy.open-cluster-management.io/v1
 kind: Policy
 metadata:
-  name: rhacs-central
+  name: central-config-policy
+  namespace: open-cluster-management
   annotations:
-    policy.open-cluster-management.io/standards: Security
-    policy.open-cluster-management.io/categories: Kubernetes
-    policy.open-cluster-management.io/controls: RHACS Central
+    force-recheck: "true"
 spec:
-  remediationAction: enforce
   disabled: false
   policy-templates:
     - objectDefinition:
         apiVersion: policy.open-cluster-management.io/v1
         kind: ConfigurationPolicy
         metadata:
-          name: rhacs-central-namespace
+          name: central-cr-configuration
         spec:
-          remediationAction: inform
-          severity: high
           object-templates:
             - complianceType: musthave
               objectDefinition:
-                apiVersion: v1                    
-                kind: Namespace
-                metadata:
-                  labels:
-                    openshift.io/cluster-monitoring: "true"
-                  name: rhacs-operator
-    - objectDefinition:
-        apiVersion: policy.open-cluster-management.io/v1
-        kind: ConfigurationPolicy
-        metadata:
-          name: rhacs-central
-        spec:
-          remediationAction: inform
-          severity: high
-          object-templates:
-            - complianceType: musthave
-              objectDefinition:
-                apiVersion: platform.rhacs-operator.io/v1alpha1
+                apiVersion: platform.stackrox.io/v1alpha1
                 kind: Central
                 metadata:
-                  name: rhacs-operator-central-services
+                  name: stackrox-central-services
                   namespace: rhacs-operator
                 spec:
                   central:
@@ -49,10 +29,47 @@ spec:
                       resources:
                         requests:
                           cpu: 250m
-                          memory: 4Gi
+                          memory: 1Gi
                     resources:
-                      limits:
-                        memory: 4Gi
                       requests:
-                        cpu: 500m
-                        memory: 2Gi
+                        cpu: 250m
+                        memory: 1Gi
+          remediationAction: enforce
+          severity: low
+  remediationAction: enforce
+---
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: central-config-policy-placement
+  namespace: open-cluster-management
+spec:
+  clusterSets:
+    - default
+  predicates:
+    - requiredClusterSelector:
+        labelSelector:
+          matchExpressions:
+            - key: environment
+              operator: In
+              values:
+                - hub
+  tolerations:
+    - key: cluster.open-cluster-management.io/unreachable
+      operator: Exists
+    - key: cluster.open-cluster-management.io/unavailable
+      operator: Exists
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: central-config-policy-placement
+  namespace: open-cluster-management
+placementRef:
+  name: central-config-policy-placement
+  apiGroup: cluster.open-cluster-management.io
+  kind: Placement
+subjects:
+  - name: central-config-policy
+    apiGroup: policy.open-cluster-management.io
+    kind: Policy
