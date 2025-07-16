@@ -1,0 +1,16 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: apps-prime-davecore-xyz-certificate
+  namespace: openshift-ingress
+spec:
+  commonName: apps.prime.davecore.xyz
+  dnsNames:
+    - "apps.prime.davecore.xyz" 
+    - "*.apps.prime.davecore.xyz"
+  secretName: apps-prime-davecore-xyz-tls
+  isCA: false
+  issuerRef:
+    group: cert-manager.io
+    name: letsencrypt-cluster-issuer
+    kind: ClusterIssuer
