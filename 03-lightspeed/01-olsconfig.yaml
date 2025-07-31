@@ -1,0 +1,19 @@
+apiVersion: ols.openshift.io/v1alpha1
+kind: OLSConfig
+metadata:
+  name: cluster
+spec:
+  llm:
+    providers:
+      - credentialsSecretRef:
+          name: azure-api-keys
+        deploymentName: gpt-4o
+        models:
+          - name: gpt-4o
+        name: myAzure
+        type: azure_openai
+        url: https://dcoro-manfehu1-eastus2.cognitiveservices.azure.com/
+  ols:
+    defaultModel: gpt-4o
+    defaultProvider: myAzure
+    introspectionEnabled: true
