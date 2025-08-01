@@ -1,0 +1,31 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: ldap-group-syncer
+  namespace: ldap-sync
+data:
+  sync.yaml: |
+    kind: LDAPSyncConfig
+    apiVersion: v1
+    url: ldap://pi.davecore.xyz:389
+    bindDN: "cn=admin,dc=davecore,dc=xyz"
+    bindPassword:
+      file: "/etc/secrets/bindPassword"
+    insecure: true
+    rfc2307:
+      groupsQuery:
+        baseDN: "ou=Groups,dc=davecore,dc=xyz"
+        scope: sub
+        derefAliases: never
+        filter: "(objectClass=groupOfNames)"
+      groupUIDAttribute: dn
+      groupNameAttributes: [ "cn" ]
+      groupMembershipAttributes: [ "member" ]
+      usersQuery:
+        baseDN: "ou=People,dc=davecore,dc=xyz"
+        scope: sub
+        derefAliases: never
+        filter: "(objectClass=inetOrgPerson)"
+      userUIDAttribute: uid
+      userNameAttributes: [ "cn" ]
+      tolerateMemberNotFoundErrors: true

@@ -71,3 +71,9 @@ Finally, the created groups were confirmed by listing the OpenShift groups.
 oc get groups
 ```
 
+### Step 4: Automation
+
+Cron job added to automate the syncing. 
+
+In a production environment, would also need to use whitelisting for fine-grained filtering.
+
