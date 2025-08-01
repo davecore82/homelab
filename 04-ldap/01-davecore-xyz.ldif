@@ -1,0 +1,32 @@
+#
+# LDIF file to create a basic directory structure with three empty groups
+#
+# Note: This file is configured for the base DN "dc=davecore,dc=xyz"
+#
+# --- Organizational Units (OUs) ---
+dn: ou=Groups,dc=davecore,dc=xyz
+objectClass: organizationalUnit
+ou: Groups
+
+dn: ou=People,dc=davecore,dc=xyz
+objectClass: organizationalUnit
+ou: People
+
+# --- Groups with a dummy member to satisfy schema validation ---
+# The dummy member 'cn=nobody' doesn't need to exist as a real entry in the directory.
+# This is a common workaround for creating empty groups.
+
+dn: cn=developer-team,ou=Groups,dc=davecore,dc=xyz
+objectClass: groupOfNames
+cn: developer-team
+member: cn=nobody
+
+dn: cn=qa-team,ou=Groups,dc=davecore,dc=xyz
+objectClass: groupOfNames
+cn: qa-team
+member: cn=nobody
+
+dn: cn=management-team,ou=Groups,dc=davecore,dc=xyz
+objectClass: groupOfNames
+cn: management-team
+member: cn=nobody

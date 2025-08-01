@@ -1,0 +1,22 @@
+# ldap.yaml
+url: ldap://pi.davecore.xyz:389
+bindDN: "cn=admin,dc=davecore,dc=xyz"
+bindPassword: "<LDAP_ADMIN_PASSWORD>"
+
+insecure: true
+
+groupUID: dn
+groupNameAttributes: [ "cn" ]
+groupMembershipAttributes: [ "member" ]
+
+groupSearch:
+  baseDN: "ou=Groups,dc=davecore,dc=xyz"
+  scope: sub
+  filter: "(objectClass=groupOfNames)"
+
+userSearch:
+  # Since your groups don't have real members, this section is not
+  # critical for the sync to succeed, but it's required in the config.
+  # We'll point it to your 'People' OU anyway.
+  baseDN: "ou=People,dc=davecore,dc=xyz"
+  scope: sub
