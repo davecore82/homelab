@@ -75,5 +75,20 @@ oc get groups
 
 Cron job added to automate the syncing. 
 
-In a production environment, would also need to use whitelisting for fine-grained filtering.
+```
+$ oc get jobs -n ldap-sync
 
+NAME                         COMPLETIONS   DURATION   AGE
+ldap-group-syncer-29234580   1/1           12s        4m30s
+
+$ oc logs -f job/ldap-group-syncer-29234580 -n ldap-sync
+
+For group "cn=developer-team,ou=Groups,dc=davecore,dc=xyz", ignoring member "cn=nobody": search for entry with base dn="ou=People,dc=davecore,dc=xyz" and filter "(&((objectClass=inetOrgPerson))(uid=cn=nobody))" did not return any results
+group/developer-team
+For group "cn=qa-team,ou=Groups,dc=davecore,dc=xyz", ignoring member "cn=nobody": search for entry with base dn="ou=People,dc=davecore,dc=xyz" and filter "(&((objectClass=inetOrgPerson))(uid=cn=nobody))" did not return any results
+group/qa-team
+For group "cn=management-team,ou=Groups,dc=davecore,dc=xyz", ignoring member "cn=nobody": search for entry with base dn="ou=People,dc=davecore,dc=xyz" and filter "(&((objectClass=inetOrgPerson))(uid=cn=nobody))" did not return any results
+group/management-team
+```
+
+Note: In a production environment, would also need to use whitelisting for fine-grained filtering.
