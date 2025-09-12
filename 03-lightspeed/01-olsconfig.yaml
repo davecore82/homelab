@@ -17,3 +17,10 @@ spec:
     defaultModel: gpt-4o
     defaultProvider: myAzure
     introspectionEnabled: true
+    rag:
+      - image: 'quay.io/dialvare/acme-byok:latest'
+        indexID: vector_db_index
+        indexPath: /rag/vector_db
+    userDataCollection:
+      feedbackDisabled: true
+      transcriptsDisabled: true
