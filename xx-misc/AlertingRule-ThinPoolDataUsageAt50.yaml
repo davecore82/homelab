@@ -1,0 +1,18 @@
+apiVersion: monitoring.openshift.io/v1
+kind: AlertingRule
+metadata:
+  name: thinpooldatausageat50
+  namespace: openshift-monitoring 
+spec:
+  groups:
+  - name: example-rules
+    rules:
+    - "alert": "ThinPoolDataUsageAt50"
+      "annotations":
+        "description": "Thin pool in the VolumeGroup reached 50%. Data deletion or thin pool expansion is required."
+        "message": "Thin Pool data utilization in the VolumeGroup {{ $labels.device_class }} has crossed 50 % on node {{ $labels.node }}. Free up some space or expand the thin pool."
+      "expr": |
+        topolvm_thinpool_data_percent > 50.0  and topolvm_thinpool_data_percent < 75.00
+      "for": "5m"
+      "labels":
+        "severity": "warning"
