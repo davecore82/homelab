@@ -21,6 +21,6 @@ spec:
       - image: 'quay.io/dialvare/acme-byok:latest'
         indexID: vector_db_index
         indexPath: /rag/vector_db
-    userDataCollection:
-      feedbackDisabled: true
-      transcriptsDisabled: true
+#    userDataCollection:
+#      feedbackDisabled: true
+#      transcriptsDisabled: true
