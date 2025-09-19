@@ -3,6 +3,11 @@ kind: MultiClusterObservability
 metadata:
   name: observability
 spec:
+  advanced:
+    retentionConfig:
+      deleteDelay: 1h
+      retentionResolutionRaw: 30d
+      retentionResolution5m: 30d
   observabilityAddonSpec: {}
   storageConfig:
     metricObjectStorage:
