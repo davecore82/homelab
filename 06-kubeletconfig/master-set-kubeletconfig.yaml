@@ -4,7 +4,7 @@ metadata:
   name: master-set-kubeletconfig
 spec:
   kubeletConfig:
-    maxPods: 1000
+    maxPods: 500
   machineConfigPoolSelector:
     matchLabels:
       pools.operator.machineconfiguration.openshift.io/master: ""
