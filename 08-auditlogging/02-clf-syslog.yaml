@@ -1,0 +1,32 @@
+apiVersion: observability.openshift.io/v1
+kind: ClusterLogForwarder
+metadata:
+  name: collector
+  namespace: openshift-logging
+spec:
+  managementState: Managed
+  serviceAccount:
+    name: collector
+  outputs:
+  - name: rsyslog-pi
+    syslog:
+      appName: openshift-audit
+      enrichment: KubernetesMinimal
+      facility: local0
+      procId: OC_AUDIT
+      rfc: RFC5424
+      severity: informational
+      tuning:
+        deliveryMode: AtLeastOnce
+      url: "tls://pi.davecore.xyz:6514"
+    tls:  
+      ca:
+        key: ca-bundle.crt
+        secretName: syslog-ca-bundle
+    type: syslog
+  pipelines:
+  - inputRefs: 
+    - audit
+    name: audit-to-rsyslog-pi
+    outputRefs:
+    - rsyslog-pi
