@@ -24,10 +24,10 @@ spec:
           complianceType: musthave
           subscription:
             name: quay-operator
-            startingCSV: quay-operator.v3.15.1
+            startingCSV: quay-operator.v3.13.0
           upgradeApproval: Automatic
           versions:
-            - quay-operator.v3.15.1
+            - quay-operator.v3.13.0
 ---
 apiVersion: policy.open-cluster-management.io/v1
 kind: PlacementBinding
