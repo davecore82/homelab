@@ -24,6 +24,7 @@ spec:
           complianceType: musthave
           subscription:
             name: quay-operator
+            channel: stable-3.13
             startingCSV: quay-operator.v3.13.0
           upgradeApproval: Automatic
           versions:
