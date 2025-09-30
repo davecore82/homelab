@@ -1,0 +1,45 @@
+# Source: Mix of https://developers.redhat.com/articles/2024/08/08/getting-started-operatorpolicy and https://docs.redhat.com/en/documentation/red_hat_advanced_cluster_management_for_kubernetes/2.11/html-single/governance/index
+# CSV name 'quay-operator.v3.15.1' found using 'oc get packagemanifests -n openshift-marketplace quay-operator -o yaml'
+
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: install-quay
+  namespace: open-cluster-management-global-set
+  annotations:
+    policy.open-cluster-management.io/categories: ""
+    policy.open-cluster-management.io/standards: ""
+    policy.open-cluster-management.io/controls: ""
+spec:
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1beta1
+        kind: OperatorPolicy
+        metadata:
+          name: install-quay
+        spec:
+          remediationAction: enforce
+          severity: medium
+          complianceType: musthave
+          subscription:
+            name: quay-operator
+            startingCSV: quay-operator.v3.15.1
+          upgradeApproval: Automatic
+          versions:
+            - quay-operator.v3.15.1
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: install-quay-placement
+  namespace: open-cluster-management-global-set
+placementRef:
+  name: global
+  apiGroup: cluster.open-cluster-management.io
+  kind: Placement
+subjects:
+  - name: install-quay
+    apiGroup: policy.open-cluster-management.io
+    kind: Policy
+
