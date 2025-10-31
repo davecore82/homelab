@@ -1,0 +1,24 @@
+apiVersion: monitoring.openshift.io/v1
+kind: AlertingRule
+metadata:
+  creationTimestamp: "2025-10-30T15:57:00Z"
+  generation: 1
+  name: netobserv-alerts
+  namespace: openshift-monitoring
+  resourceVersion: "111879064"
+  uid: 6015000e-bf88-45fc-96d4-c8eae45c9ff9
+spec:
+  groups:
+  - name: NetObservAlerts
+    rules:
+    - alert: NetObservIncomingBandwidth
+      annotations:
+        message: '{{ $labels.job }}: incoming traffic exceeding 10 MBps for 30s on
+          {{ $labels.DstK8S_OwnerType }} {{ $labels.DstK8S_OwnerName }} ({{ $labels.DstK8S_Namespace
+          }}).'
+        summary: High incoming traffic.
+      expr: sum(rate(netobserv_workload_ingress_bytes_total     {SrcK8S_Namespace="openshift-ingress"}[1m]))
+        by (job, DstK8S_Namespace, DstK8S_OwnerName, DstK8S_OwnerType) > 10000000
+      for: 30s
+      labels:
+        severity: warning

@@ -1,0 +1,28 @@
+apiVersion: monitoring.openshift.io/v1
+kind: AlertingRule
+metadata:
+  creationTimestamp: "2025-10-30T16:05:09Z"
+  generation: 1
+  name: netobserv-node-network-pressure
+  namespace: openshift-monitoring
+  resourceVersion: "111888221"
+  uid: 7f427e2e-fafc-4d27-97ab-28a23224057a
+spec:
+  groups:
+  - name: NetObservNodeAlerts
+    rules:
+    - alert: NetObservNodeIncomingNetworkPressure
+      annotations:
+        message: The node '{{ $labels.node }}' is experiencing high aggregate incoming
+          network pressure, with total traffic exceeding 50 MBps for 5 minutes.
+        summary: High total incoming traffic on a node.
+      expr: |
+        sum by (node) (
+          rate(netobserv_workload_ingress_bytes_total[5m])
+          * on(pod, namespace) group_left(node)
+          kube_pod_info
+        )
+        > 52428800 # 50 MBps (50 * 1024 * 1024 bytes/second)
+      for: 5m
+      labels:
+        severity: warning

@@ -1,0 +1,23 @@
+apiVersion: monitoring.openshift.io/v1
+kind: AlertingRule
+metadata:
+  name: netobserv-node-network-pressure
+  namespace: openshift-monitoring
+spec:
+  groups:
+  - name: NetObservNodeAlerts
+    rules:
+    - alert: NetObservNodeIncomingNetworkPressure
+      annotations:
+        message: |-
+          The node '{{ $labels.DstK8S_HostName }}' is experiencing high aggregate incoming network pressure, with total traffic exceeding 50 MBps ({{ $value | humanizeBytes }}/s) for 5 minutes.
+        summary: "High total incoming network traffic on a node."
+      expr: |
+        # Calculate the sustained incoming byte rate for the entire node, grouped by its hostname.
+        sum by (DstK8S_HostName) (
+          rate(netobserv_node_ingress_bytes_total[5m])
+        )
+        > 52428800 # 50 MBps (50 * 1024 * 1024 bytes/second)
+      for: 5m
+      labels:
+        severity: warning

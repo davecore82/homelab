@@ -1,0 +1,23 @@
+apiVersion: monitoring.openshift.io/v1
+kind: AlertingRule
+metadata:
+  name: highnodenetworkbandwidthpressure
+  namespace: openshift-monitoring # Standard location for cluster-wide alerts [4]
+spec:
+  groups:
+    - name: network-node-pressure
+      rules:
+        - alert: NodeNetworkBandwidthSaturation
+          # PromQL Expression: Calculate the sum of incoming traffic rate (bytes/second) 
+          # across all workloads, grouped specifically by the destination node name.
+          # Example Threshold: > 80,000,000 bytes/sec (80 MB/s, roughly saturating an 800 Mbps link).
+          expr: |
+            sum(rate(netobserv_workload_ingress_bytes_total[5m])) by (DstK8S_HostName) > 80000000
+          for: 5m
+          annotations:
+            summary: "Critical Node Network Pressure on Node {{ $labels.DstK8S_HostName }}"
+            message: "The total incoming network bandwidth rate (ingress) on node {{ $labels.DstK8S_HostName }} has exceeded 80 MBps for 5 minutes. This high throughput indicates potential competition and saturation among co-located pods sharing the node's network interface."
+          labels:
+            severity: critical # Use 'critical' since physical saturation directly impacts service performance
+            product: netobserv
+
