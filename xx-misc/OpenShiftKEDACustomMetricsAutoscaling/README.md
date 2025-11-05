@@ -40,10 +40,10 @@ Open two separate terminal windows for monitoring:
 
 The current metric query is **`count(up{...})`**, which returns **1** when a pod is running. To force a massive scale-up, we will temporarily increase the required `threshold` for the entire Deployment.
 
-1.  **Modify the Target:** Edit the `ScaledObject` and change the `threshold` from `1` to a low number that represents a high demand, for example, **`0.1`**.
+1.  **Modify the Target:** Edit the `ScaledObject` and change the `threshold` to `1000` or `1`, depending if you want to modify the sensitivity. 
 
       * **Old Threshold:** `threshold: "1"`
-      * **New Threshold (High Demand):** `threshold: "0.1"`
+      * **New Threshold (Low Demand):** `threshold: "1000"`
 
 2.  **Apply Change:** Apply the modified `scaledobject.yaml`.
 
@@ -56,32 +56,3 @@ The current metric query is **`count(up{...})`**, which returns **1** when a pod
   * **HPA (Terminal 2):** The **TARGETS** column should show the new metric ratio (e.g., `1/0.1 (avg)`). KEDA will interpret the demand as 10x the target per pod.
   * **Pods (Terminal 1):** The HPA will quickly scale the Deployment from 1 pod up to the maximum limit of **5 replicas** (`maxReplicas: 5`).
 
------
-
-## 2️⃣ Test: Scale-Down to Zero (Simulating Zero Demand)
-
-This test verifies the system successfully detects idleness and scales down to the most resource-efficient state (`minReplicas: 0`).
-
-### A. Restore Demand Metric
-
-1.  **Restore Threshold:** Edit the `ScaledObject` back to the original operational threshold of **`1`**.
-    ```yaml
-    threshold: "1" 
-    ```
-2.  **Apply Change:** `oc apply -f scaledobject.yaml -n seleniumtest`
-      * The HPA will immediately start scaling down from 5 to 1 replica over the next 5 minutes, as the calculation is now `ceil(1 / 1) = 1`.
-
-### B. Trigger Zero Demand
-
-1.  **Simulate Zero Sessions:** Stop the source of the metric by deleting the Deployment. This makes the `up` metric report a value of **0**.
-    ```bash
-    oc delete deployment selenium-metrics-exporter -n seleniumtest
-    ```
-
-### C. Validation
-
-1.  **HPA Cooldown (Terminal 2):** The **TARGETS** column will show a value of `<unknown>` or **`0/1`**. The HPA will enter the cooldown period (governed by `cooldownPeriod: 300s`).
-2.  **Wait 5 Minutes:** Allow the **300 seconds** to elapse.
-3.  **Final State (Terminal 1):** After cooldown, the HPA will scale the Deployment to **0 replicas**. You should see all `selenium-metrics-exporter` pods terminate.
-
-A successful scale-down to **0 replicas** confirms that the entire KEDA custom metrics pipeline is working correctly for both provisioning resources and saving costs.
