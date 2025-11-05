@@ -1,0 +1,43 @@
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: selenium-node-autoscaler
+  namespace: seleniumtest
+  labels:
+    # Label to match the Deployment being scaled
+    deploymentName: selenium-metrics-exporter 
+spec:
+  # 1. Target Reference (Using 'name' as required by your CRD)
+  scaleTargetRef:
+    name: selenium-metrics-exporter 
+  
+  # 2. Scaling Behavior
+  minReplicaCount: 0        # Scales down to zero when idle (Saves costs)
+  maxReplicaCount: 5        # Maximum number of browser nodes
+  pollingInterval: 30       # Check the metric every 30 seconds
+  cooldownPeriod: 300       # Wait 5 minutes (300 seconds) before scaling down
+
+  # 3. Triggers (Prometheus Scaler for Custom Metrics)
+  triggers:
+  - type: prometheus
+    metadata:
+      # Address of OpenShift's internal Thanos Querier for User Workload Monitoring
+      serverAddress: https://thanos-querier.openshift-monitoring.svc:9091 
+      
+      # PromQL Query: Simulates counting pending sessions.
+      query: |
+        count(node_cpu_seconds_total{job="selenium-metrics-service", namespace="seleniumtest"})
+      
+      # The name KEDA gives to the custom metric (visible in the HPA)
+      metricName: selenium_pending_sessions_count 
+      
+      # Scale-up Target: Scale up when the query result is >= "1"
+      threshold: "1" 
+      
+      # Authentication method is Bearer Token
+      authModes: "bearer" 
+    
+    # 4. Authentication Reference
+    authenticationRef:
+      # Must match the name of the TriggerAuthentication resource you created
+      name: keda-prometheus-auth

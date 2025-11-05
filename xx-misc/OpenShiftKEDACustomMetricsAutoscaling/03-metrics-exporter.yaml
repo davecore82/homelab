@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: selenium-metrics-exporter
+  labels:
+    app: selenium-metrics-exporter
+    # The 'k8s-app' label is a common convention used by OpenShift's default
+    # Prometheus instance to discover ServiceMonitors.
+    k8s-app: selenium-metrics-exporter 
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: selenium-metrics-exporter
+  template:
+    metadata:
+      labels:
+        app: selenium-metrics-exporter
+        k8s-app: selenium-metrics-exporter # Must match the Deployment/Service selector
+    spec:
+      containers:
+      - name: metrics-exporter
+        # Using a simple, popular exporter image for demonstration
+        image: quay.io/prometheus/node-exporter:latest 
+        ports:
+        - name: metrics # Named port for Service and ServiceMonitor
+          containerPort: 9100 # Default port for node-exporter
+        # The node-exporter provides a metric we can use for simulation, 
+        # such as 'node_cpu_seconds_total' or 'node_memory_MemAvailable_bytes'.
+        # We will SIMULATE the Prometheus Query to make it look like
+        # 'selenium_pending_sessions_total'.

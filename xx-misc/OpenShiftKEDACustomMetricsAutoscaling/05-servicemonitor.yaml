@@ -1,0 +1,20 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: selenium-metrics-monitor
+  # Place the ServiceMonitor in the same namespace as the target Service
+  namespace: seleniumtest
+  labels:
+    # This label MUST match the selector defined in your Prometheus resource, 
+    # typically a label like 'monitoring: custom' or 'k8s-app: selenium-metrics-exporter'
+    k8s-app: selenium-metrics-exporter 
+spec:
+  selector:
+    matchLabels:
+      # This matches the labels on the Service we created (selenium-metrics-service)
+      app: selenium-metrics-exporter 
+  endpoints:
+  - port: metrics # This must match the name of the port in the Service: 'metrics'
+    interval: 15s # Scrape interval
+    path: /metrics # Default path for Prometheus metrics

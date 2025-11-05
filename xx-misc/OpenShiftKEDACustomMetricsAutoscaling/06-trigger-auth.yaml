@@ -1,0 +1,11 @@
+# 4. Create the TriggerAuthentication resource to reference the Secret
+apiVersion: keda.sh/v1alpha1
+kind: TriggerAuthentication
+metadata:
+  name: keda-prometheus-auth
+  namespace: seleniumtest
+spec:
+  secretTargetRef:
+  - parameter: bearerToken # KEDA Prometheus Scaler parameter name
+    name: keda-prometheus-token 
+    key: token # The key in the Secret that holds the token value

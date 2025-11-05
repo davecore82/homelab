@@ -1,0 +1,40 @@
+# 1. ServiceAccount: The identity used by KEDA to connect to Prometheus
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: keda-prometheus-sa
+  namespace: seleniumtest
+
+---
+# 2. RoleBinding: Grants the ServiceAccount read access to metrics within its OWN namespace
+# This uses the 'monitoring-viewer' ClusterRole.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: keda-prometheus-rb
+  namespace: seleniumtest
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: monitoring-viewer
+subjects:
+- kind: ServiceAccount
+  name: keda-prometheus-sa
+  namespace: seleniumtest
+
+---
+# 3. ClusterRoleBinding (The Fix): Grants the ServiceAccount cluster-wide read access 
+# to Prometheus APIs, which was necessary to resolve the 403 Forbidden error.
+# This uses the 'cluster-monitoring-view' ClusterRole.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: keda-query-prometheus-binding-seleniumtest
+subjects:
+- kind: ServiceAccount
+  name: keda-prometheus-sa
+  namespace: seleniumtest 
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-monitoring-view
