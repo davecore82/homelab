@@ -12,7 +12,7 @@ spec:
           # across all workloads, grouped specifically by the destination node name.
           # Example Threshold: > 80,000,000 bytes/sec (80 MB/s, roughly saturating an 800 Mbps link).
           expr: |
-            sum(rate(netobserv_workload_ingress_bytes_total[5m])) by (DstK8S_HostName) > 80000000
+            sum(rate(netobserv_workload_ingress_bytes_total[5m])) by (DstK8S_HostName) > 8000
           for: 5m
           annotations:
             summary: "Critical Node Network Pressure on Node {{ $labels.DstK8S_HostName }}"
