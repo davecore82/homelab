@@ -1,0 +1,63 @@
+apiVersion: observability.openshift.io/v1
+kind: ClusterLogForwarder
+metadata:
+  name: collector
+  namespace: openshift-logging
+spec:
+  managementState: Managed
+  serviceAccount:
+    name: collector
+  outputs:
+  - name: rsyslog-pi
+    syslog:
+      appName: openshift-audit
+      enrichment: KubernetesMinimal
+      facility: local0
+      procId: OC_AUDIT
+      rfc: RFC5424
+      severity: informational
+      tuning:
+        deliveryMode: AtLeastOnce
+      url: "tls://pi.davecore.xyz:6514"
+    tls:
+      ca:
+        key: ca-bundle.crt
+        secretName: syslog-ca-bundle
+    type: syslog
+  pipelines:
+  - name: audit-to-rsyslog-pi
+    inputRefs:
+      - audit
+    filterRefs:
+      - my-policy
+    outputRefs:
+    - rsyslog-pi
+  filters:
+    - name: my-policy
+      type: kubeAPIAudit
+      kubeAPIAudit:
+        # Don't generate audit events for all requests in RequestReceived stage.
+        omitStages:
+          - "RequestReceived"
+
+        rules:
+          # 1. Log **Modification** events (create, update, delete) for Pods at RequestResponse level.
+          - level: RequestResponse
+            verbs: ["create", "update", "delete"]
+            resources:
+            - group: "" # core API group
+              resources: ["pods"]
+
+          # 2. Log **Modification** events (create, update, delete) for Deployments at RequestResponse level.
+          - level: RequestResponse
+            verbs: ["create", "update", "delete"]
+            resources:
+            - group: "apps" # Deployments are in the 'apps' group
+              resources: ["deployments"]
+
+          # 3. Suppress all other modification events for all other resources.
+          - level: None
+            verbs: ["create", "update", "delete"]
+            
+          # 4. Final catch-all: Set all remaining events (mostly 'get', 'list', 'watch', etc.) to None.
+          - level: None # <--- Filter out the 'get' event you were seeing

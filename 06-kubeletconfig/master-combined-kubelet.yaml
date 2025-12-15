@@ -1,0 +1,18 @@
+apiVersion: machineconfiguration.openshift.io/v1
+kind: KubeletConfig
+metadata:
+  # Choose a unique and descriptive name
+  name: master-combined-kubelet-settings
+spec:
+  # This selector ensures the configuration applies only to the 'master' pool
+  machineConfigPoolSelector:
+    matchLabels:
+      pools.operator.machineconfiguration.openshift.io/master: ""
+  # The autoSizingReserved field is set outside of kubeletConfig
+  autoSizingReserved: true # From 'dynamic-node'
+  kubeletConfig:
+    # From 'controlplane-imagegc-thresholds'
+    imageGCHighThresholdPercent: 70
+    imageGCLowThresholdPercent: 65
+    # From 'master-set-kubeletconfig'
+    maxPods: 500

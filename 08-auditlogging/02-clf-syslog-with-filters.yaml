@@ -1,0 +1,101 @@
+apiVersion: observability.openshift.io/v1
+kind: ClusterLogForwarder
+metadata:
+  name: collector
+  namespace: openshift-logging
+spec:
+  managementState: Managed
+  serviceAccount:
+    name: collector
+  outputs:
+  - name: rsyslog-pi
+    syslog:
+      appName: openshift-audit
+      enrichment: KubernetesMinimal
+      facility: local0
+      procId: OC_AUDIT
+      rfc: RFC5424
+      severity: informational
+      tuning:
+        deliveryMode: AtLeastOnce
+      url: "tls://pi.davecore.xyz:6514"
+    tls:  
+      ca:
+        key: ca-bundle.crt
+        secretName: syslog-ca-bundle
+    type: syslog
+  pipelines:
+  - name: audit-to-rsyslog-pi
+    inputRefs: 
+      - audit
+    filterRefs:
+      - my-policy
+    outputRefs:
+    - rsyslog-pi
+  filters:
+    - name: my-policy
+      type: kubeAPIAudit
+      kubeAPIAudit:
+        # Don't generate audit events for all requests in RequestReceived stage.
+        omitStages:
+          - "RequestReceived"
+
+        rules:
+          # Log pod changes at RequestResponse level
+          - level: RequestResponse
+            resources:
+            - group: ""
+              resources: ["pods"]
+
+          # Log "pods/log", "pods/status" at Metadata level
+          - level: Metadata
+            resources:
+            - group: ""
+              resources: ["pods/log", "pods/status"]
+
+          # Don't log requests to a configmap called "controller-leader"
+          - level: None
+            resources:
+            - group: ""
+              resources: ["configmaps"]
+              resourceNames: ["controller-leader"]
+
+          # Don't log watch requests by the "system:kube-proxy" on endpoints or services
+          - level: None
+            users: ["system:kube-proxy"]
+            verbs: ["watch"]
+            resources:
+            - group: "" # core API group
+              resources: ["endpoints", "services"]
+
+          # Don't log authenticated requests to certain non-resource URL paths.
+          - level: None
+            userGroups: ["system:authenticated"]
+            nonResourceURLs:
+            - "/api*" # Wildcard matching.
+            - "/version"
+
+          # Log the request body of configmap changes in kube-system.
+          - level: Request
+            resources:
+            - group: "" # core API group
+              resources: ["configmaps"]
+            # This rule only applies to resources in the "kube-system" namespace.
+            # The empty string "" can be used to select non-namespaced resources.
+            namespaces: ["kube-system"]
+
+          # Log configmap and secret changes in all other namespaces at the Metadata level.
+          - level: Metadata
+            resources:
+            - group: "" # core API group
+              resources: ["secrets", "configmaps"]
+
+          # Log all other resources in core and extensions at the Request level.
+          - level: Request
+            resources:
+            - group: "" # core API group
+            - group: "extensions" # Version of group should NOT be included.
+
+          # A catch-all rule to log all other requests at the Metadata level.
+          - level: Metadata
+
